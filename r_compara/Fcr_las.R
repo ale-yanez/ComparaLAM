@@ -46,14 +46,14 @@ dens <- ggplot(data,aes(x=Fcr, fill=Asesoria)) + geom_density(alpha=0.25) +
 
 dens    
 
-ggsave(dens, filename = "../figures/LAN/figure_7.png", width=8, height=6.5, dpi=300)
+ggsave(dens, filename = "../figures/LAS/figure_7.png", width=8, height=6.5, dpi=300)
 
 box <- ggplot(data,aes(x=Asesoria, y=Fcr, fill=Asesoria)) + geom_boxplot() +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text=element_text(size=9)) +
   ylab('Fcr') + xlab('Asesoría')
 
 box
-ggsave(box, filename = "../figures/LAN/figure_8.png", width=8, height=6.5, dpi=300)
+ggsave(box, filename = "../figures/LAS/figure_8.png", width=8, height=6.5, dpi=300)
 
 
 dens_2 <- ggplot(data,aes(x=Fcr, fill=Asesoria)) + geom_density(alpha=0.25) +
@@ -62,4 +62,4 @@ dens_2 <- ggplot(data,aes(x=Fcr, fill=Asesoria)) + geom_density(alpha=0.25) +
 
 dens_2 <- dens_2 + facet_grid(Asesoria ~ .)
 dens_2
-ggsave(dens_2, filename = "../figures/LAN/figure_9.png", width=6.5, height=8.5, dpi=300)
+ggsave(dens_2, filename = "../figures/LAS/figure_9.png", width=6.5, height=8.5, dpi=300)
