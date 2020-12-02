@@ -1,0 +1,2 @@
+"CPUE" "Crucero" "Desemb" "prop" "prop_mflo" "prop_hflo" "pobs_crum" "pobs_cruh" "Ro" "No_m" "No_h" "Lo_m" "Lo_h" "cvage_m" "cvage_h"
+"1" 74.0262 40.1906 10.8463 5.32787 9460.52 5202.59 13237.4 3469.15 29.5666 8.30888 9.84628 0.000257014 0.00732552 2.47716e-08 0.0481036

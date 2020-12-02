@@ -1,0 +1,238 @@
+---
+title: "Langostino amarillo area norte"
+author: "MJZ -DBS"
+date: "septiembre 2018"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r echo=FALSE, warning=FALSE, include=FALSE}
+rm(list=ls())   
+library(stringr)
+library(knitr)
+library(dplyr)
+library(ggplot2)
+source('C:/Users/doris.bucarey/Documents/Crustaceos/Funciones/functions.R')
+source('C:/Users/doris.bucarey/Documents/Crustaceos/Funciones/read.report.R')
+dir.0<-'C:/Users/doris.bucarey/Documents/Crustaceos/CBA_LAM/2019/norte'
+dir.1<-'C:/Users/doris.bucarey/Documents/Crustaceos/CBA_LAM/2019/norte/Lamnor1809'
+dir.2<-'C:/Users/doris.bucarey/Documents/Crustaceos/CBA_LAM/2019/norte/Proy_recl'
+```
+
+```{r echo=FALSE, warning=FALSE, include=FALSE}
+#setwd(dir.0)
+#unlink(dir.2,recursive=T) 
+#dir.create(file.path('C:/Users/doris.bucarey/Documents/Crustaceos/CBA_LAM/2019/norte/','Proy_recl'))
+#setwd(dir.1)
+#file.copy(c('Lamnor1809.dat', 'lamnor1809.exe'),dir.2)  
+```
+
+
+
+```{r  echo=FALSE, warning=FALSE, include=FALSE}
+setwd(dir.2)
+data        <- lisread('lamnor1809.dat')
+names(data) <- str_trim(names(data), side="right")
+dat         <- data
+
+```
+
+#Escenarios 
+**Esc 1:** Ro
+**Esc 2:** Ro x 0.5
+**Esc 3:** Ro x 1.5
+
+```{r  echo=FALSE, warning=FALSE}
+
+#_    CREA Y CORRE CASOS_________________________________________
+#=====================================================================
+setwd(dir.2)
+#--------------
+# escenario 1: base 2017
+dat        <- data
+dat$Tasa_bdpr[1] <- 1
+#writeData(paste('lamnor1809s',1,'.dat', sep=''), dat, append=FALSE)
+
+# escenario 2: Ro/2
+dat$pry_nR <- 0.5
+#writeData(paste('lamnor1809s',2,'.dat', sep=''), dat, append=FALSE)
+
+# escenario 3: Ro*1.5
+dat         <- data
+dat$pry_nR <- 1.5
+#writeData(paste('lamnor1809s',3,".dat",sep=""), dat, append=FALSE)
+
+```    
+
+
+```{r echo=FALSE, warning=FALSE, include=FALSE}
+#--------------------------------------------------------------------------------------
+#CORRE TODOS LOS ESCENARIOS
+#--------------------------------------------------------------------------------------
+setwd(dir.2)
+run<-rbind("lamnor1809 -ind %1.dat","copy lamnor1809.rep %1.rep","copy lamnor1809.std %1.std")
+cat(run,file=(can<-file("run.bat","wb",encoding="UTF-8")),sep="\n")
+close(can)
+
+n<-3
+corre <- rep(NA,n)
+s     <- seq(1,n,1)
+for(i in 1:n){corre[i]<-paste("call run  lamnor1809s",s[i],sep="")}
+cat(corre,file=(can<-file("corre.bat","wb",encoding="UTF-8")),sep="\n");close(can)
+
+#system("corre") 
+```
+
+
+
+```{r echo=FALSE, warning=FALSE}
+setwd(dir.2)
+yrs  <- seq(2019,2028,1)
+nyr  <- length(yrs)
+```
+
+
+
+```{r echo=FALSE, warning=FALSE}
+setwd(dir.2) # Proyeccion para Rmed y 3 estrategias de explotacion
+rep1      <-reptoRlist('lamnor1809s1.rep') #escenario Reclutamiento medio
+rep2      <-reptoRlist('lamnor1809s2.rep')  #escenario Reclutamiento medio * 0.5
+rep3      <-reptoRlist('lamnor1809s3.rep')  #escenario Reclutamiento medio * 1.5  
+
+outBD <- data.frame(rbind(rep1$BD_proy,rep2$BD_proy,rep3$BD_proy))
+outYP <- data.frame(rbind(rep1$C_proy,rep2$C_proy,rep3$C_proy))
+
+#Figuras de proyeccion de la BD y Y para el escenario de Rmed y tres estrategias de explotación
+plot(yrs,outBD[1:10,3]*10^-3, type='l', cex.axis=0.8,main = 'BD proyectada',
+     ylab = 't  x 10e3',las=1, xlab='Años', cex.lab=1.1, lwd=1 , ylim = c(0,3), xlim = c(2019,2028))
+        lines(yrs, outBD[1:10,2]*10^-3, t='l', col=2, lwd=1, lty=2)
+        lines(yrs, outBD[1:10,4]*10^-3, t='l', col=3, lwd=1, lty=2)
+        abline(h=(rep1$BDoLP*0.45)*10^-3,lty=2,col=4,lwd=1)
+        text(2023,(rep1$BDoLP*0.45)*10^-3+0.1,'BD = 45%BDPR',cex=1, col = 4)
+        legend(2019,3,c('F45','F40', 'Fsq'), lty=c(1,2,2), col=seq(1,3,1),
+        bty="n",lwd=1,cex = 1)
+
+plot(yrs,outYP[1:10,3]*10^-3, type='l', cex.axis=0.8,main = 'Captura proyectada',
+     ylab = 't  x 10e3',las=1, xlab='Años', cex.lab=1.1, lwd=1 , ylim = c(0,2), xlim = c(2019,2028))
+        lines(yrs, outYP[1:10,2]*10^-3, t='l', col=2, lwd=1, lty=2)
+        lines(yrs, outYP[1:10,4]*10^-3, t='l', col=3, lwd=1, lty=2)
+        abline(h=rep1$C_proy[20,3]*10^-3,lty=2,col=4,lwd=1)
+        text(2023,1.4+0.1,'Ct=45%YPR',cex=1, col = 4)
+        legend(2019,2,c('F45','F40', 'Fsq'), lty=c(1,2,2), col=seq(1,3,1),
+        bty="n",lwd=1,cex = 1)
+        
+
+
+```
+
+```{r echo=FALSE, warning=FALSE, include=FALSE}
+#proyecciones
+setwd(dir.2)
+library(dplyr)
+library(reshape)
+library(ggthemes)
+yrs2 = seq(2019,2028,1)
+outBD2 <- data.frame(rbind(rep1$BD_proy[1:10,],rep2$BD_proy[1:10,],rep3$BD_proy[1:10,]))
+outYP2 <- data.frame(rbind(rep1$C_proy[1:10,],rep2$C_proy[1:10,],rep3$C_proy[1:10,]))
+colnames(outBD2) <- c('F30', 'F40','F45','Fsq')
+colnames(outYP2) <- c('F30', 'F40','F45','Fsq')
+
+Bd2 <- as.data.frame(outBD2[,2:4]) %>% mutate (year=rep(yrs2,3)) %>% mutate(Rec=c(rep('Rmed',each=10),rep('Rmed / 2',each=10),
+          rep('Rmed x 1.5',each=10)))%>% melt(id.vars=c('year','Rec'))
+
+Yp2 <- as.data.frame(outYP2[,2:4]) %>% mutate (year=rep(yrs2,3)) %>% mutate(Rec=c(rep('Rmed',each=10),rep('Rmed / 2',each=10),
+          rep('Rmed x 1.5',each=10)))%>% melt(id.vars=c('year','Rec'))
+
+
+figBD  <- ggplot(Bd2) + geom_line(aes(x=year, y=value, color = variable)) +
+          facet_wrap(~Rec, dir='v') + labs(x = 'Año', y = 'Biomasa desovante proyectada (t)')+ #, scale='free'
+          theme_bw() + theme(legend.title = element_blank())
+
+figYp  <- ggplot(Yp2) + geom_line(aes(x=year, y=value, color = variable)) +
+          facet_wrap(~Rec, dir='v') + labs(x = 'Año', y = 'Captura proyectada (t)')+ #, scale='free'
+          theme_bw()+ theme(legend.title = element_blank())
+
+png(paste(getwd(), 'BD_proy.png',sep ="/"),width=350,height=520)
+figBD
+dev.off()
+
+png(paste(getwd(), 'Y_proy.png',sep ="/"),width=350,height=520)
+figYp
+dev.off()
+
+ source('C:/Users/doris.bucarey/Documents/Crustaceos/Funciones/multiplot.R')
+ op<-par(no.readonly=TRUE)
+ ps.options(horizontal=F,bg="white",onefile=FALSE,paper="special")
+ postscript("proyecciones.png",height=8,width=10) 
+ multiplot(figBD, figYp, cols=2)
+
+
+
+```
+
+
+
+
+
+```{r echo=FALSE, warning=FALSE}
+setwd(dir.2)
+std.1   <- read.table('lamnor1809s1.std',header=T,sep="",na="NA",fill=T) 
+std.2   <- read.table('lamnor1809s2.std',header=T,sep="",na="NA",fill=T) 
+std.3   <- read.table('lamnor1809s3.std',header=T,sep="",na="NA",fill=T) 
+
+# niveles de riesgo (cuantiles)
+q      <- seq(0.1,0.5,0.1)                               
+nq     <- length(q)                                                                                  
+CBAi   <- matrix(ncol=nq)
+
+#Estrategia F45%
+CBAp1    <-subset(std.1,name=='CBA')$value[3]
+CBApstd1 <-subset(std.1,name=='CBA')$std[3]
+for(j in 1:nq){CBAi[j]<-qnorm(q[j],CBAp1,CBApstd1)}	               
+CBA1 <- CBAi
+
+CBAp2    <-subset(std.2,name=='CBA')$value[3]
+CBApstd2 <-subset(std.2,name=='CBA')$std[3]
+for(j in 1:nq){CBAi[j]<-qnorm(q[j],CBAp2,CBApstd2)}	               
+CBA2 <- CBAi
+
+CBAp3    <-subset(std.3,name=='CBA')$value[3]
+CBApstd3 <-subset(std.3,name=='CBA')$std[3]
+for(j in 1:nq){CBAi[j]<-qnorm(q[j],CBAp3,CBApstd3)}	               
+CBA3 <- CBAi
+
+tCBAp1<-cbind(CBAp1,CBApstd1,CBA1); tCBAp2<-cbind(CBAp2,CBApstd2,CBA2); tCBAp3<-cbind(CBAp3,CBApstd3,CBA3)
+tCBAp <- rbind(tCBAp1,tCBAp2,tCBAp3)
+colnames(tCBAp)<-c("mean","std",seq(10,50,10))
+tCBAp
+kable(t(round(tCBAp)))
+
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+setwd(dir.2)
+#Estrategia F40%
+CBAp1    <-subset(std.1,name=='CBA')$value[2]
+CBApstd1 <-subset(std.1,name=='CBA')$std[2]
+for(j in 1:nq){CBAi[j]<-qnorm(q[j],CBAp1,CBApstd1)}	               
+CBA1 <- CBAi
+
+CBAp2    <-subset(std.2,name=='CBA')$value[2]
+CBApstd2 <-subset(std.2,name=='CBA')$std[2]
+for(j in 1:nq){CBAi[j]<-qnorm(q[j],CBAp2,CBApstd2)}	               
+CBA2 <- CBAi
+
+CBAp3    <-subset(std.3,name=='CBA')$value[2]
+CBApstd3 <-subset(std.3,name=='CBA')$std[2]
+for(j in 1:nq){CBAi[j]<-qnorm(q[j],CBAp3,CBApstd3)}	               
+CBA3 <- CBAi
+
+tCBAp1<-cbind(CBAp1,CBApstd1,CBA1); tCBAp2<-cbind(CBAp2,CBApstd2,CBA2); tCBAp3<-cbind(CBAp3,CBApstd3,CBA3)
+tCBAp <- rbind(tCBAp1,tCBAp2,tCBAp3)
+colnames(tCBAp)<-c("mean","std",seq(10,50,10))
+tCBAp
+kable(t(round(tCBAp)))
+
+```

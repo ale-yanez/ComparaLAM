@@ -1,0 +1,621 @@
+---
+title: 'ESTATUS_lamnor1805_lamnor1809'
+author: 'MJZ & DABS'
+date: 'Septiembre 2018'
+output: word_document
+---
+```{r echo=FALSE, warning=FALSE, include=FALSE}
+rm(list=ls())   
+library(stringr)
+library(knitr)
+library(dplyr)
+library(ggplot2)
+library(reshape)
+library(ggthemes)
+source('C:/Users/doris.bucarey/Documents/Crustaceos/Funciones/functions.R')
+source('C:/Users/doris.bucarey/Documents/Crustaceos/Funciones/read.report.R')
+source('C:/Users/doris.bucarey/Documents/Crustaceos/Funciones/Fn_PBRs.R')
+source('C:/Users/doris.bucarey/Documents/Crustaceos/Funciones/Fn_DiagramaFase.R')
+dir.1<-'C:/Users/doris.bucarey/Documents/Crustaceos/CBA_LAM/2019/norte/Lamnor1809'
+
+
+source('~/Documents/Rwork/Functions/Funciones/functions.R')
+source('~/Documents/Rwork/Functions/Funciones/read.report.R')
+source('~/Documents/Rwork/Functions/Funciones/Fn_PBRs.R')
+source('~/Documents/Rwork/Functions/Funciones/Fn_DiagramaFase.R')
+dir.1<-'~/Documents/ADMwork/IFOP/2018/Lama_model/norte/Lamnor1809'
+
+
+
+setwd(dir.1)
+#---------------------------------------------------------------------------
+#system('admb MATT1808')
+#system("MATT1808')
+#---------------------------------------------------------------------------
+dat.file1    = 'Lamnor1809.dat'
+dat1        <- lisread(paste(dir.1,dat.file1, sep='/'));
+names(dat1) <- str_trim(names(dat1), side="right")
+rep1        <- reptoRlist('lamnor1809.rep')                                               
+years1      <- dat1$Ind[,1]
+nyears1     <- dat1$nyrs
+std1        <- read.table('lamnor1809.std', header=T, sep="", na="NA", fill=T)
+age         <- dat1$edades
+nage        <- dat1$nages
+#---------------------------------------------------------------------------
+
+#dat.file2   = 'lamnor18.dat'
+#dat2        <- lisread(paste(dir.1,dat.file2, sep='/'));
+#names(dat2) <- str_trim(names(dat2), side="right")
+rep2        <- reptoRlist('lamnor18.rep')                                               
+years2      <- rep2$YRS
+nyears2     <- length(years2)
+std2        <- read.table('lamnor18.std', header=T, sep="", na="NA", fill=T)
+
+#---------------------------------------------------------------------------
+```
+
+```{r echo=FALSE, warning=FALSE}
+#==============================================================
+# SALIDAS DE septiembre
+#==============================================================
+
+x1      <-c(years1,rev(years1))
+x1_1    <-c(years1[1],years1[nyears1]+1,nyears1+1/2) #xaxp
+x2_1    <-c(years1[1]-1,years1[nyears1]+1) #xlim
+# BIOMASA TOTAL, DESOVANTE Y VULNERABLE
+BT1      <- subset(std1,name=='BT')$value
+BT1std   <- subset(std1,name=='BT')$std
+SSBt1    <- subset(std1,name=='BD')$value
+SSBt1std <- subset(std1,name=='BD')$std
+bt1      <- c((BT1-1.96*BT1std)*10^-3,rev((BT1+1.96*BT1std)*10^-3))
+ssbt1    <- c((SSBt1-1.96*SSBt1std)*10^-3,rev((SSBt1+1.96*SSBt1std)*10^-3))
+BV1      <- subset(std1,name=='BV')$value
+BV1std   <- subset(std1,name=='BV')$std
+# RECLUTAMIENTOS Y DESVIOS
+Reclutas1     <- subset(std1,name=='Restim')$value
+Reclutas1std  <- subset(std1,name=='Restim')$std
+logdesvRt1    <- subset(std1,name=='dev_log_Ro')$value
+logdesvRt1std <- subset(std1,name=='dev_log_Ro')$std
+rt1           <- c((Reclutas1-1.96*Reclutas1std),rev(Reclutas1+1.96*Reclutas1std))
+logdrt1       <- c((logdesvRt1-1.96*logdesvRt1std),rev(logdesvRt1+1.96*logdesvRt1std))
+# MORTALIDAD POR PESCA
+Ft1       <- subset(std1,name=='log_Fh')$value
+Ft1std    <- subset(std1,name=='log_Fh')$std
+ft1       <- c(exp((Ft1)-1.96*(Ft1std)),rev(exp((Ft1)+1.96*(Ft1std)))) 
+# F/Frms y B/Brms
+Rpr1       <- subset(std1,name=='RPRlp')$value
+Rpr1std    <- subset(std1,name=='RPRlp')$std
+Frpr1     <- subset(std1,name=='Frpr')$value
+Frpr1std  <- subset(std1,name=='Frpr')$std
+rpr1       <- c((Rpr1-1.96*Rpr1std),rev((Rpr1+1.96*Rpr1std)))
+frpr1     <- c((Frpr1-1.96*Frpr1std),rev((Frpr1+1.96*Frpr1std)))
+
+brms <- rep1$BDoLP*0.4
+frms <- rep1$Fpbr[3]
+
+```
+
+```{r echo=FALSE}
+#==============================================================
+# SALIDAS MODELO ANTERIOR
+#==============================================================
+                                                               
+x2      <-c(years2,rev(years2))
+x1_2    <-c(years2[1],years2[nyears2]+1,nyears2+1/2) #xaxp
+x2_2    <-c(years2[1]-1,years2[nyears2]+1) #xlim
+# BIOMASA TOTAL Y DESOVANTE
+BT2      <- subset(std2,name=="BT")$value
+BT2std   <- subset(std2,name=="BT")$std
+SSBt2    <- subset(std2,name=='BD')$value
+SSBt2std <- subset(std2,name=="BD")$std
+bt2      <- c((BT2-1.96*BT2std)*10^-3,rev((BT2+1.96*BT2std)*10^-3))
+ssbt2    <- c((SSBt2-1.96*SSBt2std)*10^-3,rev((SSBt2+1.96*SSBt2std)*10^-3))
+# RECLUTAMIENTOS Y DESVIOS
+Reclutas2     <- subset(std2,name=='Restim')$value
+Reclutas2std  <- subset(std2,name=='Restim')$std
+logdesvRt2    <- subset(std2,name=='dev_log_Ro')$value
+logdesvRt2std <- subset(std2,name=='dev_log_Ro')$std
+rt2           <- c((Reclutas2-1.96*Reclutas2std),rev(Reclutas2+1.96*Reclutas2std))
+logdrt2       <- c((logdesvRt2-1.96*logdesvRt2std),rev(logdesvRt2+1.96*logdesvRt2std))
+# MORTALIDAD POR PESCA
+Ft2       <- subset(std2,name=="log_Fh")$value
+Ft2std    <- subset(std2,name=="log_Fh")$std
+ft2       <- c(exp((Ft2)-1.96*(Ft2std)),rev(exp((Ft2)+1.96*(Ft2std)))) 
+# F/Frms y B/Brms
+Rpr2       <- subset(std2,name=="RPR_lp")$value
+Rpr2std    <- subset(std2,name=="RPR_lp")$std
+Frpr2     <- subset(std2,name=="Frpr")$value
+Frpr2std  <- subset(std2,name=="Frpr")$std
+rpr2       <- c((Rpr2-1.96*Rpr2std),rev((Rpr2+1.96*Rpr2std)))
+frpr2     <- c((Frpr2-1.96*Frpr2std),rev((Frpr2+1.96*Frpr2std)))
+```
+
+## Indicadores del stock de anchoveta centro-norte
+#### *Figuras Comparativas*
+
+
+```{r echo=FALSE,fig.height=7,fig.width=7}
+par(mfrow=c(2,1),mar=c(2,4,1,1)+0.5)
+	plot(x1,rt1 , type="n", xaxp=x1_1,cex.axis=0.8,xaxs= "i",yaxs= "i",
+	xlim=x2_1,ylab="Reclutamientos x 10^6",las=1,xlab="A?o",cex.lab=1.1, ylim=c(0,600))
+	polygon(x1, rt1 , col=gray(.2,0.5), border="gray80")
+	polygon(x2, rt2 , col=gray(.8,0.5), border="gray85")
+	lines(years1,Reclutas1,lwd=2,col=1,lty=1)
+	lines(years2,Reclutas2,lwd=2,col="red2",lty=2)
+	abline(h=exp(rep2$log_Ro+0.5*0.6^2)*10^-6,col="darkgray",lty=2)
+	text(1986,550,"a)",cex=1.2)
+	legend(2010,600,c('sep 2018','2017'),lty=c(1,2),col=c("black","red2"),
+	       title="Asesor?a",bty="n",lwd=2)
+
+	plot(x1, logdrt1, type="n", xaxp=x1_2,cex.axis=0.8,xaxs= "i",yaxs= "i",
+	xlim=x2_1,ylab="Desvios de los Reclutamientos",las=1,xlab="A?o",cex.lab=1.1, 
+	ylim = c(-2,max(logdrt2)+1))
+	polygon(x1, logdrt1, col=gray(.2,0.5), border="gray80")
+	polygon(x2, logdrt2, col=gray(.8,0.5), border="gray85")
+	lines(years1,logdesvRt1,lwd=2,col=1,lty=1)
+	lines(years2,logdesvRt2,lwd=2,col="red2",lty=2)
+	abline(h=0,lty=2,col="darkgray")
+	text(1986,1.6,"b)",cex=1.2)
+```
+**Figura 1.** a) Reclutamientos y b) anomal?as logar?tmicas de los reclutamientos de langostino amarillo norte. Las l?neas roja y negra corresponden al valor esperado del estimador central y las zonas sombreadas a los intervalos de confianza asint?ticos de cada evaluaci?n (septiembre 2018 y  2017).
+
+
+```{r echo=FALSE,fig.height=7,fig.width=7}
+par(mfrow=c(2,1),mar=c(2,4,1,1)+0.5)
+	plot(x1, bt1,type="n",ylim=c(0,max(bt1)+5),cex.axis=0.8,xaxs="i",yaxs="i",xlim=x2_1,xaxp=x1_1,
+	ylab="Biomasa total (t*10^3)",las=1,xlab="A?o",cex.lab=1.1)
+	polygon(x1,bt1, col=gray(.2,0.5),border="gray80")
+	polygon(x2,bt2, col=gray(.8,0.5),border="gray85")
+	lines(years1,BT1*10^-3,lwd=2,col=1,lty=1)
+	lines(years2,BT2*10^-3,lwd=2,col="red2",lty=2)
+	text(1985,25,"a)",cex=1.2)
+	legend(1985,25,c("sep 2018","abr 2018"),lty=c(1,2),col=c("black","red2"),
+	       title="Asesor?a",bty="n",lwd=2)
+	
+	plot(x1,ssbt1,type="n",ylim=c(0,max(ssbt1)+1.1),cex.axis=0.8,xaxs="i",yaxs="i",xlim=x2_1,xaxp=x1_1, 
+	ylab="Biomasa desovante (t*10^3)",las=1,xlab="A?o",cex.lab=1.1)  
+	polygon(x1,ssbt1,col=gray(.2,0.5), border="gray80")
+	polygon(x2,ssbt2,col=gray(.8,0.5), border="gray85")
+	lines(years1,SSBt1*10^-3,lwd=2,col=1,lty=1)   
+	lines(years2,SSBt2*10^-3,lwd=2,col="red2",lty=2)  
+	lines(years1,rep(brms*10^-3,nyears1),lwd=1, lty=2, col='forestgreen')
+	text(2010,brms*10^-3+0.2,"BDRMS",cex=1,col="black")
+	text(1985,4.8,"b)",cex=1.0)
+
+```
+**Figura 2.** a) Biomasa total (t) y b) desovante (t) de langostino amarillo ?rea norte. Las l?neas roja y negra corresponden al valor esperado del estimador central y las zonas sombreadas a los intervalos de confianza asint?ticos de cada evaluaci?n (ago 2018 y abr 2018). La l?nea verde corresponde al punto biol?gico de referencia BDRMS.
+
+```{r echo=FALSE,fig.height=4,fig.width=7}
+par(mfrow=c(1,1),mar=c(2,4,1,1)+0.5)
+	plot(x1, ft1, xaxp=x1_1,cex.axis=0.8,xaxs= "i",yaxs= "i", ylim=c(0,1.2),
+	xlim=x2_1,type="n", ylab="Mortalidad por pesca (F)",las=1,xlab="A?o",cex.lab=1.1)
+	polygon(x1, ft1,  col=gray(.2,0.5), border="gray80")
+	polygon(x2, ft2,  col=gray(.8,0.5), border="gray85")
+	lines(years1,exp(Ft1),lwd=2,col=1,lty=1)
+	lines(years2,exp(Ft2),lwd=2,col="red2",lty=2)
+	lines(years1,rep(frms,nyears1),lty=2)
+	lines(years1,rep(0.3,nyears1),lwd=1,col='forestgreen')
+	text(c(2013,2013),c(0.3+0.05,frms-0.03),c("M","Frms"),cex=1)
+	legend(1985,1.2,c("sep 2018","2017"),lty=c(1,2),col=c("black","red2"),
+	       title="Asesor?a",bty="n",lwd=2)
+```
+**Figura 3.** Mortalidad por pesca anual (F a?o-1) de la anchoveta centro-norte. Las l?neas roja y negra corresponden al valor esperado del estimador central y las zonas sombreadas a los intervalos de confianza asint?ticos de cada evaluaci?n (ago 2018 y mar 2018). La l?nea verde corresponde al punto biol?gico de referencia FRMS.
+
+```{r echo=FALSE,fig.height=5,fig.width=5}
+tallas <- dat1$tallas
+par(mfrow=c(2,1),mar=c(4,4,1,1)+0.5,oma=c(1,1,2,0))
+	plot(age,rep1$Sfloh_age[1,],type="l",lwd=2,las=1,ylim=c(0,1.1),ylab="Selectividad",xlab="LT (cm)")
+	lines(age,rep1$Scruh_age[1,],type="o",pch="o")
+	legend (6,0.8,c("Flota","Crucero"),pch=c("","o"),lwd=c(2,1))
+	
+plot(age,rep2$Sfloh_age[1,],type="l",lwd=2,las=1,ylim=c(0,1.1),ylab="Selectividad",xlab="LT (cm)")
+	lines(age,rep2$Scruh_age[1,],type="o",pch="o")
+	legend (6,0.8,c("Flota","Crucero"),pch=c("","o"),lwd=c(2,1))
+	
+
+
+```
+
+**Figura 4.** Patr?n de explotaci?n o selectividad de la flota y de los cruceros de ?rea de barrida de la anchoveta centro-norte (ago 2018).
+
+```{r echo=FALSE,fig.height=5,fig.width=5}
+par(mfrow=c(1,1),mar=c(4,4,1,1)+0.5,oma=c(1,1,2,0))
+	plot(age,rep1$Sfloh_age[1,],type="l",lwd=2,las=1,ylim=c(0,1.1),ylab="Selectividad",xlab="LT (cm)")
+	lines(age,rep1$Scruh_age[1,],type="o",pch="o")
+	legend (14,0.6,c("Flota","Crucero"),pch=c("","o"),lwd=c(2,1,1))
+
+```
+
+**Figura 5.** Patr?n de explotaci?n o selectividad de la flota y de los cruceros ac?sticos de la anchoveta centro-norte (abril 2018).
+
+#### *PBRs MATT1809*
+```{r echo=FALSE, include=FALSE}
+#datos de entrada
+#Dat<-list()
+#Dat$Mad  <- dat1$Msex
+#Dat$wt   <- dat1$Wt_h
+#Dat$Tspw <- dat1$dt[1]          
+#Dat$M    <- dat1$Param[1,6]            
+#Dat$Sel  <- rep1$Selflo_talla[33,]
+#Dat$pre  <- rep1$Fun_rec_talla
+#mT       <- t(rep1$MatrizTrans)
+
+#var <- c('log_F', 'BD')
+#std09  <- read.table('MATT1809s4.std', header=T,sep='',na='NA',fill=T) %>% filter(name%in%var)
+#SSB09  <- subset(std1, name=='BD') 
+#F08    <- subset(std1, name=='log_F') 
+
+#Bobj        <-c(.85,.80,.60,.55,.52,.50,.45,.40,.30,.325,0.425);Bobj
+#Fobj      	<- optim(par=rep(0.,11),fn=SPRFpbr,method='BFGS');round(Fobj$par,3)
+
+#SPR1 		    <- SPRFmort(Rmed1,c(0,Fobj$par,Fmedian1,rep1$Ftot[25]),Amax,Dat1) 
+#pSPR_Fmh1    <- as.numeric(SPR1[13,4])                     # Paso 2: C?lculo de la curva SPR
+#pB_Fmh1      <- pSPR_Fmh1-0.05                             # Paso 3: Aproximaci?n obtenci?n de %BD(Fmh)
+#SPRcurv1 		<- SPRFmort(R0,Fmort,Amax,Dat1) 
+```
+
+#### *PBRs Lamnorte1809*
+```{r echo=FALSE , include=FALSE}
+#Dat<-list()
+#Dat$Mad  <- dat2$Mad
+#Dat$wt   <- dat2$wt
+#Dat$Tspw <- dat2$dt[1]          
+#Dat$M    <- dat2$Param[1,6]            
+#Dat$Sel  <- rep2$Selflo_talla[33,]
+#Dat$pre  <- rep2$Fun_rec_talla
+#mT       <- t(rep2$MatrizTrans)
+
+#Bobj        <-c(.85,.80,.60,.55,.52,.50,.45,.40,.30,.325,0.425);Bobj
+#Fobj      <- optim(par=rep(0.,11),fn=SPRFpbr,method='BFGS');round(Fobj$par,3)
+
+#SPR1 		    <- SPRFmort(Rmed1,c(0,Fobj$par,Fmedian1,rep1$Ftot[25]),Amax,Dat1) 
+#pSPR_Fmh1    <- as.numeric(SPR1[13,4])                     # Paso 2: C?lculo de la curva SPR
+#pB_Fmh1      <- pSPR_Fmh1-0.05                             # Paso 3: Aproximaci?n obtenci?n de %BD(Fmh)
+#SPRcurv1 		<- SPRFmort(R0,Fmort,Amax,Dat1) 
+```
+
+
+
+```{r echo=FALSE}
+Bo1           <- rep1$BDoLP              # Paso 4: Obtenci?n de Bo
+BRMS1         <- Bo1*0.4                         # Paso 5: Obtenci?n de Brms = 60%SPRo = 55%Bo
+FRMS1         <- frms
+BLIM1         <- Bo1*0.275                        # Paso 6: Obtenci?n de Blim = 20%Bo 
+FLIM1         <- 1.27                             # Paso 6: Obtenci?n de Flim = 30%SPRo
+SpB1          <- SSBt1                            # BD serie hist?rica de evaluaci?n de stock 
+SpBSE1        <- SSBt1std                         # desviaci?n estandar BD
+ln_Fyr1       <- Ft1                              # logaritmo de Ft
+ln_FSE1       <- Ft1std                           # logaritmo de la desviaci?n standar de Ft
+
+Bo2           <- rep2$BDoLP              # Paso 4: Obtenci?n de Bo
+BRMS2         <- Bo2*0.4                        # Paso 5: Obtenci?n de Brms = 60%SPRo = 55%Bo
+FRMS2         <- 0.26
+BLIM2         <- Bo2*0.275                        # Paso 6: Obtenci?n de Blim = 20%Bo 
+FLIM2         <- 1.27                             # Paso 6: Obtenci?n de Flim = 30%SPRo
+SpB2          <- SSBt2                            # BD serie hist?rica de evaluaci?n de stock 
+SpBSE2        <- SSBt2std                         # desviaci?n estandar BD
+ln_Fyr2       <- Ft2                              # logaritmo de Ft
+ln_FSE2       <- Ft2std                           # logaritmo de la desviaci?n standar de Ft
+
+```
+
+#### *Tabla 1: Variables poblacionales lamnorte1809*
+```{r echo=FALSE}
+VarPobl1<- cbind(anos=years1,BD=SSBt1,BT=BT1,R=Reclutas1,F=round(exp(Ft1),3),"F/FRMS"=round(exp(Ft1)/FRMS1,3),"BD/BDRMS"=round(SSBt1/BRMS1,3),"Y/BT"=round(rep1$Desemb_pred/BT1,3))#,"C#/N#"=round(rowSums(rep1$pred_Ctot)/rowSums(rep1$N),3))
+kable(VarPobl1)
+
+```
+
+#### *Tabla 2: Variables poblacionales lamnor2017*
+```{r echo=FALSE}
+VarPobl2<- cbind(anos=years2,BD=SSBt2,BT=BT2,R=Reclutas2,F=round(exp(Ft2),3),"F/FRMS"=round(exp(Ft2)/FRMS2,3),"BD/BDRMS"=round(SSBt2/BRMS2,3),"Y/BT"=round(rep2$Desemb_pred/BT2,3))#,"C#/N#"=round(rowSums(rep2$pred_Ctot)/rowSums(rep2$N),3))
+kable(VarPobl2)
+```
+
+# ESTADO DE EXPLOTACI?N DE LA ANCHOVETA CENTRO-NORTE
+
+
+#```{r echo=FALSE,fig.height=5,fig.width=10}
+par(mfrow=c(1,2),mar=c(4,4.5,2,1)+0.5)
+
+plot(tallas,dat1$Msex,type="l",ylim=c(0,1.05),ylab="Madurez y selectividad",xlab="Edad (a?os)",
+     las=1,col=3,lwd=2)
+	lines(ages,rep1$Sfloh_age[1,],col=4,lwd=2)
+	legend(5,max(rep1$Sfloh_age[1,])-0.1,c("Madurez","Selectividad"),
+	col=c(3,4),bty="n",lwd=c(2,2),lty=c(1,1),cex=1)
+
+#plot(SPRcurv2[,1],SPRcurv2[,4],type="l",ylab="%BDPR",xlab="Mortalidad por pesca (F)",lwd=2,las=1,col=4)
+#	abline(h=0.6,v=FRMS2,col=5,lty=1)
+#	text(1,0.62,"FRMS = 0.28 ",cex=0.8,col=4)
+#```
+**Figura 6.** Madurez, selectividad (Panel izquierdo) y Curva de Biomasa por Recluta (%BDPR) (Panel derecho), utilizados en los c?lculos de Frms.
+
+
+
+#### *Salidas de MATT1809*
+```{r echo=FALSE,fig.height=8,fig.width=10}
+par(mfrow=c(2,2),mar=c(2,4,2,1)+0.5)
+plot(x1,ssbt1,type="n",ylim=c(0,max(ssbt1)+0.2),cex.axis=0.8,xaxs="i",yaxs="i",xlim=x2_1,xaxp=x1_1,
+     ylab="Biomasa desovante (t*10^3)",las=1,xlab="A?o",cex.lab=1.1)                
+polygon(x1,ssbt1,col="gray", border="gray")
+lines(years1,SSBt1*10^-3,lwd=2)   
+abline(h=c(Bo1,BRMS1,BLIM1)/10^3,lty=3,col=c(1,3,2),lwd=2)
+text(rep(2017,4),c(Bo1,BRMS1,BLIM1)/10^3+0.1,c("BDo","BDrms","BDlim"),cex=1)
+
+plot(x1, ft1, cex.axis=0.8,xaxs= "i",yaxs= "i",
+	xaxp=x1_2,xlim=x2_1,type="n", ylab="Mortalidad por pesca (F)",las=1,xlab="A?o", ylim = c(0,1),
+        cex.lab=1.1)
+	polygon(x1, ft1, col="gray", border = "gray")
+	lines(years1,exp(Ft1),lwd=2)
+	abline(h=FRMS1,lty=3,col=3,lwd=2)
+	text(rep(2012,1.5),FRMS1+0.05,"Frms",cex=1)
+
+plot(years1,rep1$BD/BRMS1,type="l",ylab="BD/BDrms",xlab="A?os",las=1,col=1,ylim=c(0,3),
+	cex.axis=0.8,xaxp=x1_2,lwd=2)
+	abline(h=c(0.5,1),col=c(2,3),lty=3,lwd=2)
+	text(rep(2012,2.8),c(0.5,1.0)+0.1,c("BDlim","BDrms"),cex=1)
+			
+plot(years1, exp(Ft1)/FRMS1,type="l",ylab="Ft/Frms",xlab="A?os",xaxp=x1_1,las=1,
+	cex.axis=0.8,lwd=2,col=1)
+	abline(h=1,lty=3,col=3,lwd=2)
+	text(2016,1.15,"Frms",cex=1)
+```
+**Figura 7.** Puntos biol?gicos de referencia y variables de estado y flujo
+
+cambiar directorio....diagrama de fase
+```{r echo=FALSE,fig.height=7,fig.width=7}
+#------------------------------------------------------------------------------------------------
+name1<-"Asesor?a de septiembre 2018"
+DiagramaFase(name1,years1,SpB1,SpBSE1,ln_Fyr1,ln_FSE1,FRMS1,BRMS1,BLIM1,FLIM1,color=F,dir.1,etiqueta=F)
+#################################################################################################
+
+```
+**Figura 8.** Diagrama de fases de explotaci?n de la biomasa desovante respecto de la mortalidad por pesca de la evaluaci?n anterior (ago 2017). Los ejes est?n estandarizados a los valores que generan el RMS proxy. Cruz azul corresponde a los intervalos de confianza de la raz?n BD/BDrms y F/Frms.
+
+```{r echo=FALSE,fig.height=7,fig.width=7}
+#------------------------------------------------------------------------------------------------
+name2<-"Asesor?a de 2017"
+DiagramaFase(name2,years2,SpB2,SpBSE2,ln_Fyr2,ln_FSE2,FRMS2,BRMS2,BLIM2,FLIM2,color=F,dir.1,etiqueta=F)
+#################################################################################################
+
+```
+**Figura 9.** Diagrama de fases de explotaci?n de la biomasa desovante respecto de la mortalidad por pesca de la evaluaci?n actual (marzo 2018). Los ejes est?n estandarizados a los valores que generan el RMS proxy. Cruz azul corresponde a los intervalos de confianza de la raz?n BD/BDrms y F/Frms.
+
+
+
+#### *PBRs MATT1809*
+**Tabla 3.** Puntos biol?gicos de referencia de biomasa (miles t.) estimados en la evaluaci?n actual (septiembre 2018: MATT1809) para anchoveta centro-norte, calculadas siguiendo los pasos descritos en la metodolog?a de este informe.
+```{r echo=FALSE}
+#Tabla3.2<-rbind( BDpromedio=round(Bmed2/10^3,0),Fmh=round(Fmedian2,2), "%BDPR_Fmh"=pSPR_Fmh2*100, "%BDPR_Frms"=60,
+#	"%BD_Fmh"=pB_Fmh2*100,"%BD_Frms"=55,BDo=round(Bo2/10^6,2),"BD55%"=round(BRMS2/10^3,0),"BD27.5%"=round(BLIM2/10^3,0))
+#colnames(Tabla3.2)<-c("Valor")
+#kable(Tabla3.2)
+
+```
+
+
+#### *PBRs MATT1804*
+**Tabla 4.** Puntos biol?gicos de referencia de biomasa (miles t) estimados en la evaluaci?n anterior (abril: MATT1804) para la anchoveta centro-norte, calculadas siguiendo los pasos descritos en la metodolog?a de este informe.
+```{r echo=FALSE}
+#------------------------------------------------------------------------------------------------
+#Tabla3.1<-rbind( BD=round(Bmed1/10^3,0),Fmh=round(Fmedian1,2), "%BDPR_Fmh"=pSPR_Fmh1*100, "%BDPR_Frms"=60,
+#	"%BD_Fmh"=pB_Fmh1*100,"%BD_Frms"=55,BDo=round(Bo1/10^6,2),"BD55%"=round(BRMS1/10^3,0),"BD27.5%"=round(BLIM1/10^3,0))
+#colnames(Tabla3.1)<-c("Valor")
+#kable(Tabla3.1)
+
+```
+
+
+```{r echo=FALSE}
+# P(BD2018<BDrms) y P(F2018/Frms) Septiembre
+rpr1809     <-subset(std1,name=="RPRlp")$value[length(years1)]
+rpr1809std  <-subset(std1,name=="RPRlp")$std[length(years1)]
+Frpr1809    <-subset(std1,name=="Frpr")$value[length(years1)]
+Frpr1809std <-subset(std1,name=="Frpr")$std[length(years1)]
+
+```
+
+```{r echo=FALSE}
+# Abril
+#------------------------------------------------------------
+#rpr1804     <-subset(std2,name=="RPRequ3")$value[length(years2)]
+#rpr1804std  <-subset(std2,name=="RPRequ3")$std[length(years2)]
+#Frpr1804   <-subset(std2,name=="Frpr")$value[length(years2)]
+#Frpr1804std <-subset(std2,name=="Frpr")$std[length(years2)]
+```
+
+
+```{r echo=FALSE}
+#P(BD2018<BDrms) 
+P_bd_bdrms1 <- pnorm(1,Rpr1[34],Rpr1std[34],lower.tail = TRUE,log.p = F)
+#P(F2015-2016>Frms)
+P_f_frms1<-1-pnorm(1,Frpr1[34],Frpr1std[34],lower.tail = TRUE,log.p = F)
+
+#Anterior
+P_bd_bdrms2<-pnorm(1,Rpr2[33],Rpr1std[33],lower.tail = TRUE,log.p = F)
+
+P_f_frms2<-1-pnorm(1,Frpr2[33],Frpr2std[33],lower.tail = TRUE,log.p = F)
+
+
+
+```
+
+
+**Tabla 5.** PBRS y P(BD2018<BDrms) y P(F2018>Frms) MATT1809
+```{r echo=FALSE}
+Tabla4.1<-rbind(Frms=round(FRMS1,2),BDrms=round(BRMS1/10^3,0),BDlim=round(BLIM1/10^3,0),P_bd_bdrms=round(P_bd_bdrms1,1),P_f_frms=round(P_f_frms1,1))
+colnames(Tabla4.1)<-"valor"
+kable(Tabla4.1)
+```
+
+
+**Tabla 6.** PBRS y P(BD2018<BDrms) y P(F2017-2018>Frms) MATT1804
+```{r echo=FALSE}
+Tabla4.2<-rbind(Frms=round(FRMS2,2),BDrms=round(BRMS2/10^3,0),BDlim=round(BLIM2/10^3,0),P_bd_bdrms=round(P_bd_bdrms2,1),P_f_frms=round(P_f_frms2,1))
+colnames(Tabla4.2)<-"valor"
+kable(Tabla4.2)
+```
+
+
+
+```{r echo=FALSE}
+# biomasa desovante vs BDrms MATT1809
+xd1  <- rnorm(1000, mean = Rpr1[34], sd = Rpr1std[34])
+xd <-seq(min(xd1),max(xd1),0.005)
+yd  <-dnorm(xd, mean = Rpr1[34], sd =Rpr1std[34])
+icd <-qnorm(c(0.05,0.95,0.5),Rpr1[34],Rpr1std[34])
+xxd <-c(xd[xd>=icd[1]&xd<=icd[2]],rev(xd[xd>=icd[1]&xd<=icd[2]]))
+yyd <-c(yd[xd>=icd[1]&xd<=icd[2]],rep(0,length(yd[xd>=icd[1]&xd<=icd[2]])))
+# mortalidad por pesca vs Frms
+xe1  <- rnorm(1000, mean = Frpr1[34], sd = Frpr1std[34])
+xe <-seq(min(xe1),max(xe1),0.005)
+ye  <-dnorm(xe, mean = Frpr1[34], sd =Frpr1std[34])
+ice <-qnorm(c(0.05,0.95,0.5),Frpr1[34],Frpr1std[34])
+xxe <-c(xe[xe>=ice[1]&xe<=ice[2]],rev(xe[xe>=ice[1]&xe<=ice[2]]))
+yye <-c(ye[xe>=ice[1]&xe<=ice[2]],rep(0,length(ye[xe>=ice[1]&xe<=ice[2]])))
+```
+
+```{r echo=FALSE, include=FALSE}
+#______________________________________________________________________________
+# biomasa desovante vs BDrms MATT1804
+#xb1  <- rnorm(1000, mean = rpr1804, sd = rpr1804std)
+#xb <-seq(min(xb1),max(xb1),0.005)
+#yb  <-dnorm(xb, mean = rpr1804, sd =rpr1804std)
+#icb <-qnorm(c(0.05,0.95,0.5),rpr1804,rpr1804std)
+#xxb <-c(xb[xb>=icb[1]&xb<=icb[2]],rev(xb[xb>=icb[1]&xb<=icb[2]]))
+#yyb <-c(yb[xb>=icb[1]&xb<=icb[2]],rep(0,length(yb[xb>=icb[1]&xb<=icb[2]])))
+# mortalidad por pesca vs Frms
+#xc1  <- rnorm(1000, mean = Frpr1804, sd = Frpr1804std)
+#xc <-seq(min(xc1),max(xc1),0.005)
+#yc  <-dnorm(xc, mean = Frpr1804, sd =Frpr1804std)
+#icc <-qnorm(c(0.05,0.95,0.5),Frpr1804,Frpr1804std)
+#xxc <-c(xc[xc>=icc[1]&xc<=icc[2]],rev(xc[xc>=icc[1]&xc<=icc[2]]))
+#yyc <-c(yc[xc>=icc[1]&xc<=icc[2]],rep(0,length(yc[xc>=icc[1]&xc<=icc[2]])))
+```
+
+#```{r echo=FALSE, fig.height=8,fig.width=10}
+par(mfcol=c(2,2),mar=c(4,4,1,1)+0.5)
+plot(x1, rpr1,type="n",ylim=c(0,max(rpr1)+0.1),cex.axis=0.8,xaxs="i",yaxs="i",xlim=x2_2,xaxp=x1_2,
+	ylab="BD/BDrms",las=1,xlab="A?o",cex.lab=1.1)
+polygon(x1,rpr1, col=gray(.2,0.5),border="gray80")
+#polygon(x2,rpr2, col=gray(.8,0.5),border="gray85")
+lines(years1,Rpr1,lwd=2,col=1,lty=1)
+#lines(years2,Rpr2,lwd=2,col="red2",lty=2)
+abline(h=c(0.5,1),lty=2,col=c("red","green3"))
+text(c(2011,1998.5),c(0.5,1)+0.15,c("BDlim","BDrms"),cex=1.2)
+legend(2006,4.05,c("sep 2018","abr 2018"),lty=c(1,2),col=c("black","red2"),bty="n",lwd=2)
+
+plot(x2,frpr2,type="n",ylim=c(0,max(frpr2)+0.5),cex.axis=0.8,xaxs="i",yaxs="i",xlim=x2_2,xaxp=x1_2,
+     ylab="F/Frms",las=1,xlab="A?o",cex.lab=1.1)                
+polygon(x1,frpr1,col=gray(.2,0.5), border="gray80")
+polygon(x2,frpr2,col=gray(.8,0.5), border="gray85")
+lines(years1,Frpr1,lwd=2,col=1,lty=1)   
+lines(years2,Frpr2,lwd=2,col="red2",lty=2) 
+abline(h=1,lty=2,col="green3")
+text(1997,1+0.2,"Frms",cex=1.2)
+#-----------------------------------------------------------------------------------------
+plot(xd,yd,type="l",ylab="Densidad de probabilidad",xaxs="i",
+	xlab="BDlast/BDrms",las=1,yaxs= "i",ylim=c(0,2),xlim=c(0,3))
+polygon(xxd,yyd,col=gray(0.2,0.5),border="gray85")
+polygon(xxb,yyb,col=gray(0.8,0.7),border="gray80")
+lines(xd,yd,lwd=2,lty=1)
+lines(xb,yb,lwd=2,col="red2",lty=2)
+legend(0.1,8,c(paste("sep 2018_IC95% = [",round(icd[1],2),"-",round(icd[2],2),"]",sep=" "),
+	paste("abr 2018_IC95% = [",round(icb[1],2),"-",round(icb[2],2),"]",sep=" ")),
+	lty=c(1,2),col=c("black","red2"),bty="n",lwd=2)
+box()
+#-----------------------------------------------------------------------------------------
+plot(xe,ye,type="n",ylab="Densidad de probabilidad",xaxs="i",
+	xlab="Flast/Frms",las=1,yaxs= "i", ylim=c(0,3),xlim=c(0.2,1.6))
+polygon(xxe,yye,col=gray(0.2,0.5),border="gray85")
+polygon(xxc,yyc,col=gray(0.8,0.5),border="gray80")
+lines(xe,ye,lwd=2,lty=1)
+lines(xc,yc,lwd=2,col="red2",lty=2)
+legend(0.5,9,c(paste("sep 2018_IC95% = [",round(ice[1],2),"-",round(ice[2],2),"]",sep=" "),
+	paste("abr 2018_IC95% = [",round(icc[1],3),"-",round(icc[2],3),"]",sep=" ")),
+	lty=c(1,2,4),col=c("black","red2","blue2"),bty="n",lwd=2)
+box()
+#```
+**Figura 10.** Comparaci?n de a) la raz?n BD/BDrms, b) la distribuci?n de probabilidad de BD2018/BDrms, c) raz?n F/Frms y d) la distribuci?n de probabilidad F2018/Frms
+
+
+
+```{r echo=FALSE,fig.height=7,fig.width=5} 
+#MATT 1809
+par(mfrow=c(2,1),mar=c(4,4,1,1)+0.5)
+plot(xd,yd,type="l",ylab="Densidad de probabilidad",
+	xlab="BD2018/BDrms",las=1,yaxs= "i",ylim=c(0,max(yd)+0.5),xlim=c(min(xd),max(xd)))
+polygon(xxd,yyd,col=gray(0.8,0.5),border="gray80")
+lines(xd,yd,lwd=2)
+text(icd[3],max(yd)+0.2,paste("IC95% = [",round(icd[1],3),"-",round(icd[2],3),"]",sep=" "),cex=0.8)
+box()
+
+plot(xe,ye,type="l",ylab="Densidad de probabilidad",
+	xlab="F2018/Frms",las=1,yaxs= "i",ylim=c(0,max(ye)+1.0),xlim=c(min(xe),max(xe)))
+polygon(xxe,yye,col=gray(0.8,0.5),border="gray80")
+lines(xe,ye,lwd=2)
+text(ice[3],max(ye)+0.5,paste("IC95% = [",round(ice[1],3),"-",round(ice[2],3),"]",sep=" "),cex=0.8)
+box()
+```
+
+
+
+
+#```{r echo=FALSE,fig.height=7,fig.width=5}
+#MATT1804
+par(mfrow=c(2,1),mar=c(4,4,1,1)+0.5)
+plot(xb,yb,type="l",ylab="Densidad de probabilidad",
+	xlab="BD2018/BDrms",las=1,yaxs= "i",ylim=c(0,max(yb)+0.5),xlim=c(min(xb),max(xb)))
+polygon(xxb,yyb,col=gray(0.8,0.5),border="gray80")
+lines(xb,yb,lwd=2)
+text(icb[3],max(yb)+0.2,paste("IC95% = [",round(icb[1],3),"-",round(icb[2],3),"]",sep=" "),cex=0.8)
+box()
+
+plot(xc,yc,type="l",ylab="Densidad de probabilidad",
+	xlab="F2018/Frms",las=1,yaxs= "i",ylim=c(0,max(yc)+0.5),xlim=c(min(xc),max(xc)))
+polygon(xxc,yyc,col=gray(0.8,0.5),border="gray80")
+lines(xc,yc,lwd=2)
+text(icc[3],max(yc)+0.2,paste("IC95% = [",round(icc[1],3),"-",round(icc[2],3),"]",sep=" "),cex=0.8)
+box()
+#```
+
+
+```{r echo=FALSE}
+#______________________________________________________________________________
+# Yact
+Yact=std1[148,3]; Ystd=std1[148,4]
+xyact  <- rnorm(1000, mean = Yact, sd = Ystd)
+xact <-seq(min(xyact),max(xyact),0.5)
+yact  <-dnorm(xact, mean = Yact, sd =Ystd)
+icba <-qnorm(c(0.05,0.95,0.5),Yact,Ystd)
+xxcba <-c(xyact[xyact>=icba[1]&xyact<=icba[2]],rev(xyact[xyact>=icba[1]&xyact<=icba[2]]))
+yyb <-c(yact[yact>=icba[1]&yact<=icba[2]],rep(0,length(yact[xyact>=icba[1]&xyact<=icba[2]])))
+```
+
+```{r echo=FALSE, include=FALSE, fig.height=7,fig.width=5}
+#par(mfrow=c(2,1),mar=c(4,4,1,1)+0.5)
+#plot(xyact,yact,type="l",ylab="Densidad de probabilidad",
+#	xlab="CBA",las=1,yaxs= "i",ylim=c(0,max(yact)),xlim=c(min(xyact),max(xyact)))
+#polygon(xxd,yyd,col=gray(0.8,0.5),border="gray80")
+#lines(xyact,yact,lwd=2)
+#text(icba[3],max(yact)+0.2,paste("IC95% = [",round(icba[1],3),"-",round(icba[2],3),"]",sep=" "),cex=0.8)
+#box()
+```
+
+
+**Tabla 1:**  CBA 2018 Septiembre 2018
+```{r echo=FALSE, warning=FALSE}
+r    <- seq(0.1,0.5,0.1) # niveles de riesgo (cuantiles)                                
+nr   <- length(r)                                                                                   
+CBA  <- matrix(ncol=nr)
+
+	CBAp    <-subset(std1,name=='CBA')$value[3]
+	CBApstd <-subset(std1,name=='CBA')$std[3]
+	for(j in 1:nr){	CBA[j]<-qnorm(r[j],CBAp,CBApstd)}
+
+tCBA<-round(cbind(CBAp,CBApstd,CBA),0)
+colnames(tCBA)<-c("mean","std",seq(10,50,10))
+kable(tCBA)
+tCBA
+
+```
