@@ -24,66 +24,42 @@ std18 <- read.table("../2018/stock_LAN/output/base.std", header=T, sep="", na="N
 out17 <- read.admb("../2017/stock_LAN/output/base")
 std17 <- read.table("../2017/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
 
-Bo20 <- subset(std20,name=='SSBo')$value
-Bo19 <- subset(std19,name=='SSBo')$value
-Bo18 <- subset(std18,name=='SSBo')$value
-Bo17 <- subset(std17,name=='SSBo')$value
+Ro20 <- exp(subset(std20,name=='log_Ro')$value)
+Ro19 <- exp(subset(std19,name=='log_Ro')$value)
+Ro18 <- exp(subset(std18,name=='log_Ro')$value)
+Ro17 <- exp(subset(std17,name=='log_Ro')$value)
 
-sd_Bo20 <- subset(std20,name=='SSBo')$std
-sd_Bo19 <- subset(std19,name=='SSBo')$std
-sd_Bo18 <- subset(std18,name=='SSBo')$std
-sd_Bo17 <- subset(std17,name=='SSBo')$std
-
-rms20 <- out20$BDoLP*0.4
-rms19 <- out19$BDoLP*0.4
-rms18 <- out18$BDoLP*0.4
-rms17 <- out17$BDoLP*0.4
+sd_Ro20 <- exp(subset(std20,name=='log_Ro')$std)
+sd_Ro19 <- exp(subset(std19,name=='log_Ro')$std)
+sd_Ro18 <- exp(subset(std18,name=='log_Ro')$std)
+sd_Ro17 <- exp(subset(std17,name=='log_Ro')$std)
 
 
-x <- data.frame(ev20=rnorm(1000,Bo20,sd_Bo20),ev19=rnorm(1000,Bo19,sd_Bo19),ev18=rnorm(1000,Bo18,sd_Bo18),ev17=rnorm(1000,Bo17,sd_Bo17))
+x <- data.frame(ev20=rnorm(1000,Ro20,sd_Ro20),ev19=rnorm(1000,Ro19,sd_Ro19),ev18=rnorm(1000,Ro18,sd_Ro18),ev17=rnorm(1000,Ro17,sd_Ro17))
 data<- melt(x)
 head(data)
-data$rms <- c(rep(rms20,1000),rep(rms19,1000),rep(rms18,1000),rep(rms17,1000))
-colnames(data) <- c('Asesoria', 'SSBo', 'rms')
+colnames(data) <- c('Asesoria', 'Ro')
 
-dens <- ggplot(data,aes(x=SSBo, fill=Asesoria)) + geom_density(alpha=0.25) +
+dens <- ggplot(data,aes(x=Ro, fill=Asesoria)) + geom_density(alpha=0.25) +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text=element_text(size=9)) +
-  ylab('Densidad') + xlab('Biomasa Desovante Virginal')
+  ylab('Densidad') + xlab('Ro')
 
 dens    
 
-ggsave(dens, filename = "../figures/figure_1.png", width=8, height=6.5, dpi=300)
+ggsave(dens, filename = "../figures/LAN/figure_4.png", width=8, height=6.5, dpi=300)
 
-box <- ggplot(data,aes(x=Asesoria, y=SSBo, fill=Asesoria)) + geom_boxplot() +
+box <- ggplot(data,aes(x=Asesoria, y=Ro, fill=Asesoria)) + geom_boxplot() +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text=element_text(size=9)) +
-  ylab('Biomasa Deesovante Virginal') + xlab('Asesoría')
+  ylab('Ro') + xlab('Asesoría')
 
 box
-ggsave(box, filename = "../figures/figure_2.png", width=8, height=6.5, dpi=300)
+ggsave(box, filename = "../figures/LAN/figure_5.png", width=8, height=6.5, dpi=300)
 
 
-
-
-
-dens <- ggplot(data,aes(x=SSBo, fill=Asesoria)) + geom_density(alpha=0.25) +
-  geom_vline(xintercept=data$rms, size=1, color=Asesoria) +
+dens_2 <- ggplot(data,aes(x=Ro, fill=Asesoria)) + geom_density(alpha=0.25) +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text=element_text(size=9)) +
-  ylab('Densidad') + xlab('Biomasa Desovante Virginal')
+  ylab('Densidad') + xlab('Ro')
 
-dens + facet_grid(Asesoria ~ .)
-
-+ geom_vline(xintercept=rms20, size=1, color="red") +
-  geom_vline(xintercept=rms19, size=1, color="red")
-
-
-
-p1 <- ggplot(data=d_mflo, aes(x=Tallas, y=pobs)) +
-  geom_bar(stat="identity", colour='grey') + 
-  geom_line(data=d_mflo, aes(x=as.numeric(Tallas), y=ppred, colour = 'red')) + 
-  #scale_x_discrete('Tallas', breaks = seq(10, 52, by= 6)) +
-  xlab('Tallas') + ylab('Proporción') + theme_bw() + theme(legend.position ='none') + 
-  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.text=element_text(size=8))
-
-p1 <- p1 + facet_wrap(~ yrs, dir = 'v', scales='free')  + scale_x_discrete('Tallas', breaks = seq(10, 52, by= 6)) + scale_y_continuous(limits=c(0,0.16))
-p1
-
+dens_2 <- dens_2 + facet_grid(Asesoria ~ .)
+dens_2
+ggsave(dens_2, filename = "../figures/LAN/figure_6.png", width=6.5, height=8.5, dpi=300)

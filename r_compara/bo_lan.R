@@ -52,14 +52,14 @@ dens <- ggplot(data,aes(x=SSBo, fill=Asesoria)) + geom_density(alpha=0.25) +
 
 dens    
 
-ggsave(dens, filename = "../figures/figure_1.png", width=8, height=6.5, dpi=300)
+ggsave(dens, filename = "../figures/LAN/figure_1.png", width=8, height=6.5, dpi=300)
 
 box <- ggplot(data,aes(x=Asesoria, y=SSBo, fill=Asesoria)) + geom_boxplot() +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text=element_text(size=9)) +
   ylab('Biomasa Deesovante Virginal') + xlab('Asesoría')
 
 box
-ggsave(box, filename = "../figures/figure_2.png", width=8, height=6.5, dpi=300)
+ggsave(box, filename = "../figures/LAN/figure_2.png", width=8, height=6.5, dpi=300)
 
 
 dens_2 <- ggplot(data,aes(x=SSBo, fill=Asesoria)) + geom_density(alpha=0.25) +
@@ -68,4 +68,4 @@ dens_2 <- ggplot(data,aes(x=SSBo, fill=Asesoria)) + geom_density(alpha=0.25) +
   ylab('Densidad') + xlab('Biomasa Desovante Virginal')
 
 dens_2 <- dens_2 + facet_grid(Asesoria ~ .)
-ggsave(dens_2, filename = "../figures/figure_3.png", width=6.5, height=8.5, dpi=300)
+ggsave(dens_2, filename = "../figures/LAN/figure_3.png", width=6.5, height=8.5, dpi=300)
