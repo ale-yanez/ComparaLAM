@@ -12,17 +12,17 @@ setwd(dirname(current_path ))
 
 devtools::source_url("https://github.com/ale-yanez/RFunctions/blob/master/read.admb.R?raw=TRUE")
 
-out20 <- read.admb("../2020/stock_LAN/output/base")
-std20 <- read.table("../2020/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
+out20 <- read.admb("../2020/stock_LAS/output/base")
+std20 <- read.table("../2020/stock_LAS/output/base.std", header=T, sep="", na="NA", fill=T)
 
-out19 <- read.admb("../2019/stock_LAN/output/base")
-std19 <- read.table("../2019/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
+out19 <- read.admb("../2019/stock_LAS/output/base")
+std19 <- read.table("../2019/stock_LAS/output/base.std", header=T, sep="", na="NA", fill=T)
 
-out18 <- read.admb("../2018/stock_LAN/output/base")
-std18 <- read.table("../2018/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
+out18 <- read.admb("../2018/stock_LAS/output/base")
+std18 <- read.table("../2018/stock_LAS/output/base.std", header=T, sep="", na="NA", fill=T)
 
-out17 <- read.admb("../2017/stock_LAN/output/base")
-std17 <- read.table("../2017/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
+out17 <- read.admb("../2017/stock_LAS/output/base")
+std17 <- read.table("../2017/stock_LAS/output/base.std", header=T, sep="", na="NA", fill=T)
 
 Bo20 <- subset(std20,name=='SSBo')$value
 Bo19 <- subset(std19,name=='SSBo')$value
@@ -52,14 +52,14 @@ dens <- ggplot(data,aes(x=SSBo, fill=Asesoria)) + geom_density(alpha=0.25) +
 
 dens    
 
-ggsave(dens, filename = "../figures/LAN/figure_1.png", width=8, height=6.5, dpi=300)
+ggsave(dens, filename = "../figures/LAS/figure_1.png", width=8, height=6.5, dpi=300)
 
 box <- ggplot(data,aes(x=Asesoria, y=SSBo, fill=Asesoria)) + geom_boxplot() +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text=element_text(size=9)) +
   ylab('Biomasa Deesovante Virginal') + xlab('Asesoría')
 
 box
-ggsave(box, filename = "../figures/LAN/figure_2.png", width=8, height=6.5, dpi=300)
+ggsave(box, filename = "../figures/LAS/figure_2.png", width=8, height=6.5, dpi=300)
 
 
 dens_2 <- ggplot(data,aes(x=SSBo, fill=Asesoria)) + geom_density(alpha=0.25) +
@@ -68,4 +68,5 @@ dens_2 <- ggplot(data,aes(x=SSBo, fill=Asesoria)) + geom_density(alpha=0.25) +
   ylab('Densidad') + xlab('Biomasa Desovante Virginal')
 
 dens_2 <- dens_2 + facet_grid(Asesoria ~ .)
-ggsave(dens_2, filename = "../figures/LAN/figure_3.png", width=6.5, height=8.5, dpi=300)
+dens_2
+ggsave(dens_2, filename = "../figures/LAS/figure_3.png", width=6.5, height=8.5, dpi=300)
