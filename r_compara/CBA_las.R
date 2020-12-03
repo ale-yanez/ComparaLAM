@@ -5,7 +5,7 @@ library(ggplot2)
 library(reshape)
 library(ggpubr)
 library(devtools)
-library("viridis")
+
 
 # Getting the path of your current open file
 current_path = rstudioapi::getActiveDocumentContext()$path 
@@ -13,10 +13,10 @@ setwd(dirname(current_path ))
 
 devtools::source_url("https://github.com/ale-yanez/RFunctions/blob/master/read.admb.R?raw=TRUE")
 
-std20 <- read.table("../2020/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
-std19 <- read.table("../2019/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
-std18 <- read.table("../2018/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
-std17 <- read.table("../2017/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
+std20 <- read.table("../2020/stock_LAS/output/base.std", header=T, sep="", na="NA", fill=T)
+std19 <- read.table("../2019/stock_LAS/output/base.std", header=T, sep="", na="NA", fill=T)
+std18 <- read.table("../2018/stock_LAS/output/base.std", header=T, sep="", na="NA", fill=T)
+std17 <- read.table("../2017/stock_LAS/output/base.std", header=T, sep="", na="NA", fill=T)
 
 # Estimación CBA #### 
 
@@ -62,7 +62,7 @@ CBA18pstd <-subset(std17,name=='CBA')$std[3]
   
   tabCBA <- cbind(eval, tCBA)
   
-  write.table(tCBA, '../tables/LAN/CBAtable_01.txt', append = FALSE, sep = " ", dec = ".", row.names = TRUE, col.names = TRUE)
+  write.table(tCBA, '../tables/LAS/CBAtable_01.txt', append = FALSE, sep = " ", dec = ".", row.names = TRUE, col.names = TRUE)
 
   
   tabCBA
@@ -79,4 +79,4 @@ CBA18pstd <-subset(std17,name=='CBA')$std[3]
 
     p
     
-  ggsave(p, filename = "../figures/LAN/figure_10.png", width=8.5, height=5.5, dpi=300)  
+  ggsave(p, filename = "../figures/LAS/figure_10.png", width=8.5, height=5.5, dpi=300)  
