@@ -11,65 +11,54 @@ setwd(dirname(current_path ))
 
 devtools::source_url("https://github.com/ale-yanez/RFunctions/blob/master/read.admb.R?raw=TRUE")
 
-#out1 <- read.admb("../LAM_nor2008")
-baserep <- read.admb("~/Documents/ADMwork/IFOP/2019/Lama_model/Cons_2003/norte/Lamnor2003/LAM_nor2003")
-basestd <- read.table('~/Documents/ADMwork/IFOP/2019/Lama_model/Cons_2003/norte/Lamnor2003/LAM_nor2003.std', header=T, sep="", na="NA", fill=T)
+out20 <- read.admb("../2020/stock_LAN/output/base")
+std20 <- read.table("../2020/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
 
-Coqstd      <- read.table("~/Documents/ADMwork/IFOP/2020/Lama_model/Estatus_2008/norte/Sens/IndCoq_2008/LAmN.std", header=T, sep="", na="NA", fill=T)
-OjFisiostd  <- read.table("~/Documents/ADMwork/IFOP/2020/Lama_model/Estatus_2008/norte/Sens/ojivas_2008/LAmN_Fisio.std", header=T, sep="", na="NA", fill=T)
-OjFunstd    <- read.table("~/Documents/ADMwork/IFOP/2020/Lama_model/Estatus_2008/norte/Sens/ojivas_2008/LAmN_Fun.std", header=T, sep="", na="NA", fill=T)
-Franstd     <- read.table("~/Documents/ADMwork/IFOP/2019/Lama_model/Cons_2003/norte/A_Sens/A_Sens_Francis/LAM.std", header=T, sep="", na="NA", fill=T)
-FullCoqstd  <- read.table("~/Documents/ADMwork/IFOP/2020/Lama_model/Estatus_2008/norte/Sens/FullCoq_2008/LAmN.std", header=T, sep="", na="NA", fill=T)
+out19 <- read.admb("../2019/stock_LAN/output/base")
+std19 <- read.table("../2019/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
+
+out18 <- read.admb("../2018/stock_LAN/output/base")
+std18 <- read.table("../2018/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
+
+out17 <- read.admb("../2017/stock_LAN/output/base")
+std17 <- read.table("../2017/stock_LAN/output/base.std", header=T, sep="", na="NA", fill=T)
+
 
 # Para graficar ... ####
- yrs <- baserep$YRS
+ yrs <- out20$YRS
  #yrs <- head(baserep$YRS, -1)
  M <- 0.3
- Brms <- baserep$BDoLP*0.4
- Frms <- baserep$Fpbr[3]
+ #Brms <- baserep$BDoLP*0.4
+ #Frms <- baserep$Fpbr[3]
 
 # #predichos y estimados 
- Rec_base                 <- subset(basestd    ,name=='Restim')$value
- Rec_Coq                  <- subset(Coqstd     ,name=='Restim')$value
- Rec_OjFisio              <- subset(OjFisiostd ,name=='Restim')$value
- Rec_OjFun                <- subset(OjFunstd   ,name=='Restim')$value
- Rec_Fran                 <- subset(Franstd    ,name=='Restim')$value
- Rec_FullCoq              <- subset(FullCoqstd ,name=='Restim')$value
  
- desvRec_base             <- subset(basestd    ,name=='log_dev_Ro')$value
- desvRec_Coq              <- subset(Coqstd     ,name=='log_dev_Ro')$value
- desvRec_OjFisio          <- subset(OjFisiostd ,name=='log_dev_Ro')$value
- desvRec_OjFun            <- subset(OjFunstd   ,name=='log_dev_Ro')$value
- desvRec_Fran             <- subset(Franstd    ,name=='dev_log_Ro')$value
- desvRec_FullCoq          <- subset(FullCoqstd ,name=='log_dev_Ro')$value
+ BT_20                  <- subset(std20 ,name=='BT')$value
+ BT_19                  <- subset(std19 ,name=='BT')$value
+ BT_18                  <- subset(std18 ,name=='BT')$value
+ BT_17                  <- subset(std17 ,name=='BT')$value
+
+ BD_20                  <- subset(std20 ,name=='BD')$value
+ BD_19                  <- subset(std19 ,name=='BD')$value
+ BD_18                  <- subset(std18 ,name=='BD')$value
+ BD_17                  <- subset(std17 ,name=='BD')$value
  
- BT_base                  <- subset(basestd    ,name=='BT')$value
- BT_Coq                   <- subset(Coqstd     ,name=='BT')$value
- BT_OjFisio               <- subset(OjFisiostd ,name=='BT')$value
- BT_OjFun                 <- subset(OjFunstd   ,name=='BT')$value
- BT_Fran                  <- subset(Franstd    ,name=='BT')$value
- BT_FullCoq               <- subset(FullCoqstd ,name=='BT')$value
+ Rec_20                 <- subset(std20 ,name=='Restim')$value
+ Rec_19                 <- subset(std19 ,name=='Restim')$value
+ Rec_18                 <- subset(std18 ,name=='Restim')$value
+ Rec_17                 <- subset(std17 ,name=='Restim')$value
  
- BD_base                  <- subset(basestd    ,name=='BD')$value
- BD_Coq                   <- subset(Coqstd     ,name=='BD')$value
- BD_OjFisio               <- subset(OjFisiostd ,name=='BD')$value
- BD_OjFun                 <- subset(OjFunstd   ,name=='BD')$value
- BD_Fran                  <- subset(Franstd    ,name=='BD')$value
- BD_FullCoq               <- subset(FullCoqstd ,name=='BD')$value
+ F_20                   <- exp(subset(std20 ,name=='log_Fh')$value)
+ F_19                   <- exp(subset(std19 ,name=='log_Fh')$value)
+ F_18                   <- exp(subset(std18 ,name=='log_Fh')$value)
+ F_17                   <- exp(subset(std17 ,name=='log_Fh')$value)
  
- F_base               <- exp(subset(basestd    ,name=='log_Fh')$value)
- F_Coq                <- exp(subset(Coqstd     ,name=='log_Fh')$value)
- F_OjFisio            <- exp(subset(OjFisiostd ,name=='log_Fh')$value)
- F_OjFun              <- exp(subset(OjFunstd   ,name=='log_Fh')$value)
- F_Fran               <- exp(subset(Franstd    ,name=='log_Fh')$value)
- F_FullCoq            <- exp(subset(FullCoqstd ,name=='log_Fh')$value)
  
 # # std 
- stdRec_base       <- subset(basestd,name=='Restim')$std
- stddesvRec_base   <- subset(basestd,name=='log_dev_Ro')$std
- stdBT_base        <- subset(basestd,name=='BT')$std
- stdBD_base        <- subset(basestd,name=='BD')$std
- stdF_base         <- subset(basestd,name=='log_Fh')$std
+ stdRec_20       <- subset(std20,name=='Restim')$std
+ stdBT_20        <- subset(std20,name=='BT')$std
+ stdBD_20        <- subset(std20,name=='BD')$std
+ stdF_20         <- subset(std20,name=='log_Fh')$std
  
  
 # # Confidence Intervals
